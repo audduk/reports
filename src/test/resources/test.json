@@ -1,0 +1,35 @@
+{
+  "name":"Test",
+  "collection":"collection",
+  "lines":[
+      {
+        "id":"line1Id",
+        "type":"VALUE",
+        "descriptor":"scope.func.between(this.mkb,'I01','I56')"
+      }
+    ],
+  "columns":[
+      {
+        "id":"col1",
+        "name":"Наименование показателя",
+        "type":"CONST"
+      },
+      {
+        "id":"col2",
+        "name":"Диагнозы",
+        "type":"CONST"
+      },
+      {
+        "id":"col3",
+        "name":"Младше 18 лет",
+        "type":"CALCULATED",
+        "descriptor":"this.age<=18?1:0"
+      },
+      {
+        "id":"col4",
+        "name":"Младше 18 лет",
+        "type":"CALCULATED",
+        "descriptor":"this.age>18?1:0"
+      }
+    ]
+}
