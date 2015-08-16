@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import org.junit.Test;
 import rbt.reports.entities.*;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -13,7 +16,7 @@ public class ReportAlgorithmSerializationTest {
 
   @Test
   public void reportAlgorithmSerializationTest() {
-    ReportAlgorithm algo = new ReportAlgorithm();
+    ReportDescriptor algo = new ReportDescriptor();
     algo.setName("Test");
     algo.setCollection("collection");
 
@@ -37,8 +40,24 @@ public class ReportAlgorithmSerializationTest {
     System.out.println(result);
   }
 
+  private ReportDescriptor readAlgorithm(String resourceFile) {
+    String url = getClass().getClassLoader().getResource(resourceFile).getFile();
+    File file = new File(url);
+    try {
+      FileReader fr = new FileReader(file);
+      Gson gson = new Gson();
+      ReportDescriptor result = gson.fromJson(fr, ReportDescriptor.class);
+      fr.close();
+      return result;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
   @Test
   public void reportAlgorithmDeserializationTest() {
-
+    ReportDescriptor algo = readAlgorithm("test.json");
+    int i = 0;
   }
 }

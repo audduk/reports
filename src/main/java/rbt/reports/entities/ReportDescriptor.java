@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Описатель регламентированного отчета
  */
-public class ReportAlgorithm {
+public class ReportDescriptor {
   private String name;
   private String collection;
   private List<ReportLine> lines;
