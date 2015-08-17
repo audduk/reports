@@ -6,6 +6,10 @@
         "id":"line1Id",
         "type":"VALUE",
         "descriptor":"scope.func.between(this.mkb,'I01','I56')"
+      },
+      {
+        "id":"line2Id",
+        "type":"TOTAL"
       }
     ],
   "columns":[

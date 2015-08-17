@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Тестируем загрузку алгоритмов из эталонных json
@@ -56,8 +57,12 @@ public class ReportAlgorithmSerializationTest {
   }
 
   @Test
-  public void reportAlgorithmDeserializationTest() {
-    ReportDescriptor algo = readAlgorithm("test.json");
-    int i = 0;
+  public void initialCollectionTest() {
+    ReportDescriptor desc = readAlgorithm("test.json");
+
+    ReportsGenerator generator = new ReportsGenerator();
+    List<String> collection = generator.initialCollection("docId", desc);
+    for (String entry : collection)
+      System.out.println(entry);
   }
 }
