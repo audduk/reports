@@ -2,12 +2,12 @@ package rbt.reports.entities;
 
 
 /**
- * Описатель столбца регламентированного отчета
+ * Описатель столбца таблицы регламентированного отчета
  */
-public class ReportColumn {
+public class ColumnDescriptor {
   private String id;
   private String name;
-  private ReportColumnType type;
+  private ColumnType type;
   private String descriptor;
 
   public String getId() {
@@ -26,11 +26,11 @@ public class ReportColumn {
     this.name = name;
   }
 
-  public ReportColumnType getType() {
+  public ColumnType getType() {
     return type;
   }
 
-  public void setType(ReportColumnType type) {
+  public void setType(ColumnType type) {
     this.type = type;
   }
 

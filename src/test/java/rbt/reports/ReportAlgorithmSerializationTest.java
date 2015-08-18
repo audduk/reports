@@ -4,16 +4,11 @@ import com.google.gson.Gson;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import rbt.reports.entities.*;
+import rbt.reports.entities.TableDescriptor;
 import rbt.reports.impl.GeneratorUtils;
 import rbt.reports.impl.WorkWithMongo;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
 import java.util.Map;
 import java.util.Properties;
 
@@ -50,39 +45,13 @@ public class ReportAlgorithmSerializationTest {
     }
   }
 
-  @Test
-  public void reportAlgorithmSerializationTest() {
-    ReportDescriptor desc = new ReportDescriptor();
-    desc.setName("Test");
-    desc.setCollection("collection");
-
-    ReportLine line = new ReportLine();
-    line.setId("line1Id");
-    line.setType(ReportLineType.VALUE);
-    line.setDescriptor("line1\nDescription");
-    desc.setLines(new ArrayList<ReportLine>(1));
-    desc.getLines().add(line);
-
-    ReportColumn column = new ReportColumn();
-    column.setId("col1Id");
-    column.setName("col1Name");
-    column.setType(ReportColumnType.CONST);
-    column.setDescriptor("col1Descriptor");
-    desc.setColumns(new ArrayList<ReportColumn>(1));
-    desc.getColumns().add(column);
-
-    Gson gson = new Gson();
-    String result = gson.toJson(desc);
-    System.out.println(result);
-  }
-
-  private ReportDescriptor readDescriptor(String resourceFile) {
+  private TableDescriptor readDescriptor(String resourceFile) {
     String url = getClass().getClassLoader().getResource(resourceFile).getFile();
     File file = new File(url);
     try {
       FileReader fr = new FileReader(file);
       Gson gson = new Gson();
-      ReportDescriptor result = gson.fromJson(fr, ReportDescriptor.class);
+      TableDescriptor result = gson.fromJson(fr, TableDescriptor.class);
       fr.close();
       return result;
     } catch (IOException e) {
@@ -93,15 +62,10 @@ public class ReportAlgorithmSerializationTest {
 
   @Test
   public void initialCollectionTest() {
-    ReportDescriptor desc = readDescriptor("test.json");
+    TableDescriptor desc = readDescriptor("test.json");
 
-    GeneratorUtils generator = new GeneratorUtils("db");
-
+    GeneratorUtils generator = new GeneratorUtils();
     Map<String, Map<String, Object>> emptyCollection = generator.emptyCollection(desc);
     mongo.insertAll(emptyCollection.values());
-
-    List<String> collection = generator.initialCollection("docId", desc);
-    for (String entry : collection)
-      System.out.println(entry);
   }
 }

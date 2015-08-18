@@ -59,6 +59,10 @@ public class WorkWithMongo implements Closeable {
       insert(obj);
   }
 
+  public void select() {
+    collection.find();
+  }
+
   @Override
   public void close() throws IOException {
     if (mongoClient != null)

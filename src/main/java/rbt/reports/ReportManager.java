@@ -1,6 +1,6 @@
 package rbt.reports;
 
-import rbt.reports.entities.ReportDescriptor;
+import rbt.reports.entities.TableDescriptor;
 
 /**
  * ОПК.5.3.2. Управление документами регламентированной отчетности
@@ -8,16 +8,18 @@ import rbt.reports.entities.ReportDescriptor;
  */
 public interface ReportManager {
   /**
-   * Генерация отчета и сохранение в хранилище.
-   * Генерация пустого отчета по описателю.
+   * Генерация пустой таблицы отчета по описателю.
+   * @param docId идентификатор отчета, для которого выполняется генерация
+   * @param descriptor описатель таблицы отчета
    * @return идентификатор (uid) сгенерированного отчета, сохраненного в хранилище
    */
-  String generateEmptyDocument(ReportDescriptor descriptor);
+  String generateEmptyReportTable(String docId, TableDescriptor descriptor);
 
   /**
-   * Генерация отчета и сохранение в хранилище.
-   * Генерация отчета по описателю на основе данных аналитической базы.
+   * Генерация таблицы отчета по описателю на основе данных аналитической базы.
+   * @param docId идентификатор отчета, для которого выполняется генерация
+   * @param descriptor описатель таблицы отчета
    * @return идентификатор (uid) сгенерированного отчета, сохраненного в базе данных
    */
-  String generateDocument(ReportDescriptor descriptor);
+  String generateReportTable(String docId, TableDescriptor descriptor);
 }

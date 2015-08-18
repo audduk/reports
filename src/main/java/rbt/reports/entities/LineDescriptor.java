@@ -2,11 +2,11 @@ package rbt.reports.entities;
 
 
 /**
- *
+ * Описатель строки таблицы регламентированного отчета
  */
-public class ReportLine {
+public class LineDescriptor {
   private String id;
-  private ReportLineType type;
+  private LineType type;
   private String descriptor;
 
   public String getId() {
@@ -17,11 +17,11 @@ public class ReportLine {
     this.id = id;
   }
 
-  public ReportLineType getType() {
+  public LineType getType() {
     return type;
   }
 
-  public void setType(ReportLineType type) {
+  public void setType(LineType type) {
     this.type = type;
   }
 
