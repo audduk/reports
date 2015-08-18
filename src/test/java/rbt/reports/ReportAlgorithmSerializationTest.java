@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import rbt.reports.entities.TableDescriptor;
 import rbt.reports.impl.GeneratorUtils;
-import rbt.reports.impl.WorkWithMongo;
+import rbt.reports.impl.Mongo;
 
 import java.io.*;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Properties;
  */
 public class ReportAlgorithmSerializationTest {
 
-  private WorkWithMongo mongo;
+  private Mongo mongo;
 
   @Before
   public void before() {
@@ -27,7 +27,7 @@ public class ReportAlgorithmSerializationTest {
       FileReader fr = new FileReader(file);
       Properties prop = new Properties();
       prop.load(fr);
-      mongo = new WorkWithMongo(prop);
+      mongo = new Mongo(prop);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
@@ -66,6 +66,7 @@ public class ReportAlgorithmSerializationTest {
 
     GeneratorUtils generator = new GeneratorUtils();
     Map<String, Map<String, Object>> emptyCollection = generator.emptyCollection(desc);
-    mongo.insertAll(emptyCollection.values());
+    Mongo.Collection collection = mongo.new Collection("rrr");
+    collection.insertAll(emptyCollection.values());
   }
 }

@@ -3,4 +3,3 @@ port=27017
 dbname=test
 #login=root
 #password=root
-collection=rrr
