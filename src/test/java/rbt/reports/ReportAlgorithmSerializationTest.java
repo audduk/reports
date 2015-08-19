@@ -64,8 +64,7 @@ public class ReportAlgorithmSerializationTest {
   public void initialCollectionTest() {
     TableDescriptor desc = readDescriptor("test.json");
 
-    GeneratorUtils generator = new GeneratorUtils();
-    Map<String, Map<String, Object>> emptyCollection = generator.emptyCollection(desc);
+    Map<String, Map<String, Object>> emptyCollection = GeneratorUtils.emptyCollection(desc);
     Mongo.Collection collection = mongo.new Collection("rrr");
     collection.insertAll(emptyCollection.values());
   }

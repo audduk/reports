@@ -5,17 +5,17 @@ import rbt.reports.entities.*;
 import java.util.*;
 
 /**
- * ОПК.5.3.2. Управление документами регламентированной отчетности
- * Реализация бизнес-логики управления отчетами, вспомогательные методы генерации коллекций объектов
+ * Реализация бизнес-логики управления отчетами.
+ * Вспомогательные методы генерации коллекций объектов
  */
-public class GeneratorUtils {
+public final class GeneratorUtils {
 
   /**
    * Генерация структуры "пустого" объекта на основе описания столбцов отчета
    * @param descriptor описание отчета, для которого выполняем генерация
    * @return описание требуемого объекта
    */
-  private Map<String, Object> generateEmptyValue(TableDescriptor descriptor) {
+  public static Map<String, Object> generateEmptyValue(TableDescriptor descriptor) {
     Map<String, Object> result = new HashMap<String, Object>();
     if (descriptor.getColumns() != null)
       for (ColumnDescriptor column : descriptor.getColumns())
@@ -28,7 +28,7 @@ public class GeneratorUtils {
    * @param descriptor описание отчета, для которого выполняем генерация
    * @return описание коллекции объектов
    */
-  public Map<String, Map<String, Object>> emptyCollection(TableDescriptor descriptor) {
+  public static Map<String, Map<String, Object>> emptyCollection(TableDescriptor descriptor) {
     //считаем, что начальное состояние у всех объектов-строк одинаковое
     final Map<String, Object> emptyValue = generateEmptyValue(descriptor);
 
@@ -50,7 +50,7 @@ public class GeneratorUtils {
    * @param collection промежуточная (расчетная) коллекция
    * @return заполненная коллекция документов, подготовленная для сохранения в базу данных
    */
-  public Collection<Map<String, Object>> copyToDocument(TableDescriptor descriptor, String docId,
+  public static Collection<Map<String, Object>> copyToDocument(TableDescriptor descriptor, String docId,
                                                         Map<String, Map<String, Object>> collection) {
     Collection<Map<String, Object>> result = new ArrayList<Map<String, Object>>(collection.size());
     for (int i = 0; i < descriptor.getLines().size(); ++i) {
@@ -73,7 +73,7 @@ public class GeneratorUtils {
    * @param content содержимое нового объекта, количество аргументов должно быть более 1 и кратным 2
    * @return объект типа Map, заполенный исходными данными
    */
-  private Map<String, Object> newMap(Object... content) {
+  public static Map<String, Object> newMap(Object... content) {
     if (content.length <= 1 || content.length % 2 != 0)
       throw new IllegalArgumentException("Неправильный набор аргументов функции");
     Map<String, Object> result = new HashMap<String, Object>(content.length/2);
