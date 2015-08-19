@@ -10,6 +10,16 @@
       },
       {
         "id":"line2Id",
+        "type":"VALUE",
+        "descriptor":"scope.func.between(this.mkb,'A01','A56')"
+      },
+      {
+        "id":"line3Id",
+        "type":"SUBTOTAL",
+        "descriptor":"line2Id"
+      },
+      {
+        "id":"line4Id",
         "type":"TOTAL"
       }
     ],
