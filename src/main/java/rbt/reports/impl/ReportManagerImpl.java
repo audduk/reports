@@ -44,7 +44,7 @@ public class ReportManagerImpl implements ReportManager {
       MapReduceGenerator.Result mapReduce = MapReduceGenerator.generate(descriptor);
       //выполнить MapReduce для коллекции (сохраняем результат в коллекцию с именем collectionName)
       Mongo.Collection reduceCollection = mongo.new Collection(descriptor.getCollection());
-      reduceCollection.mapReduce(mapReduce.getMap(), mapReduce.getReduce(), collectionName);
+      reduceCollection.mapReduce(mapReduce.getMap(), mapReduce.getReduce(), null, collectionName);
       //загрузить результат из заполненной коллекции в переменную content
       // ...
     }

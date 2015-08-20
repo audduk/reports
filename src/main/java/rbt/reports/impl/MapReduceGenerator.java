@@ -1,11 +1,8 @@
 package rbt.reports.impl;
 
-import com.google.gson.Gson;
 import rbt.reports.entities.*;
 
 import java.util.*;
-
-import static rbt.reports.impl.GeneratorUtils.newMap;
 
 /**
  * ОПК.5.3.2. Управление документами регламентированной отчетности
@@ -31,33 +28,25 @@ public final class MapReduceGenerator {
   }
 
   public static Result generate(TableDescriptor descriptor) {
-    Map<String, Object> scope = newMap(
-            "filter", generateFilter(descriptor.getLines()));
-    Gson gson = new Gson();
-
+    final Generator gen = new Generator(descriptor);
     Result result = new Result();
-    result.scope = gson.toJson(scope);
-    result.map = "";
-    result.reduce = "";
+    result.map = gen.mapFunction();
+    result.reduce = gen.reduceFunction();
     return result;
   }
 
-  @Deprecated
-  private static List<Map<String, Object>> generateFilter(List<LineDescriptor> lines) {
-    List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(lines.size());
-    for (LineDescriptor line : lines) {
-      if (line.getDescriptor() == null || "".equals(line.getDescriptor()))
-        throw new RuntimeException(line.getId() + ". Отсутствует условие фильтрации (descriptor)");
-      result.add(newMap("id", line.getId(), "filter", line.getDescriptor()));
-    }
-    return result;
-  }
-
-  public static class Generator {
+  private static class Generator {
     //установленное соответствие между строками для построения строк таблицы типа SUBTOTAL
-    final Map<String,String> lineEq = new HashMap<String, String>();
+    private Map<String,String> lineEq = new HashMap<String, String>();
     //строка таблицы типа TOTAL, должна быть единственной в рамках таблицы
-    String totalLine = null;
+    private String totalLine = null;
+    //описатель таблицы, для которого выполняется генерация
+    private TableDescriptor descriptor;
+
+    public Generator(TableDescriptor descriptor) {
+      this.descriptor = descriptor;
+      prepareLines(descriptor.getLines(), descriptor.getTable());
+    }
 
     private void prepareLines(List<LineDescriptor> lines, String table) {
       for (LineDescriptor line : lines) {
@@ -79,13 +68,13 @@ public final class MapReduceGenerator {
       }
     }
 
-    public String generateMapFunction(TableDescriptor descriptor) {
-      prepareLines(descriptor.getLines(), descriptor.getTable());
-
+    public String mapFunction() {
       StringBuilder bf = new StringBuilder("function (){\n");
-      bf.append("\t").append("var _value = null;\n");
+      bf.append(" var _value = null;\n");
+      // тестовый вывод
+//      bf.append(" function emit(key, value) { print('emit'); print('key: ' + key + ' value: ' + tojson(value));}\n");
 
-      valueFunctionGenerator(bf, descriptor);
+      valueFunctionGenerator(bf);
 
       for (LineDescriptor line : descriptor.getLines()) {
         if (!LineType.VALUE.equals(line.getType()))
@@ -93,29 +82,45 @@ public final class MapReduceGenerator {
         if (line.getDescriptor() == null || "".equals(line.getDescriptor()))
           throw new RuntimeException(descriptor.getTable() + "." + line.getId() + ". Отсутствует условие фильтрации для строки (descriptor)");
 
-        bf.append("\t").append("if(").append(line.getDescriptor()).append("){").append("\n");
-        bf.append("\t\t").append("_value=_valueFunc();").append("\n");
-        bf.append("\t\t").append("if(_value!=null){").append("\n");
+        bf.append(String.format(" if(%s){\n", line.getDescriptor()));
+        bf.append(String.format("  _value=_valueFunc.call(this);\n")); //call!
+        bf.append(String.format("  if(_value!=null){\n"));
         genEmit(bf, line.getId());
         if (lineEq.containsKey(line.getId()))
           genEmit(bf, lineEq.get(line.getId()));
         if (totalLine != null && !"".equals(totalLine))
           genEmit(bf, totalLine);
-        bf.append("\t\t").append("}").append("\n");
-        bf.append("\t").append("}").append("\n");
+        bf.append("  }\n");
+        bf.append(" }\n");
       }
       bf.append("}");
       return bf.toString();
     }
 
     private StringBuilder genEmit(StringBuilder bf, String line) {
-      return bf.append("\t\t\t").append("emit(\"").append(line).append("\",_value);").append("\n");
+      return bf.append(String.format("   emit(\"%s\",_value);\n", line));
     }
 
-    private void valueFunctionGenerator(StringBuilder bf, TableDescriptor descriptor) {
-      bf.append("\t").append("function _valueFunc(){").append("\n");
-      bf.append("\t\t").append("var result={};").append("\n");
-      bf.append("\t\t").append("var val;").append("\n");
+    private void valueFunctionGenerator(final StringBuilder bf) {
+      bf.append(" function _valueFunc(){\n");
+      bf.append("  var result={};\n");
+      bf.append("  var val;\n");
+      forEachColumn(new IApply() {
+        @Override
+        public void apply(ColumnDescriptor column) {
+          bf.append(String.format("  val=%s;\n", column.getDescriptor()));
+          bf.append(String.format("  result.%s={value:val,fixed:val,drilldown:val!=0?[this._id]:[]};\n", column.getId()));
+        }
+      });
+      bf.append("  return result;\n");
+      bf.append(" }\n");
+    }
+
+    private static interface IApply {
+      void apply(ColumnDescriptor column);
+    }
+
+    private void forEachColumn(IApply apply) {
       for (ColumnDescriptor column : descriptor.getColumns()) {
         if (ColumnType.CONST.equals(column.getType()))
           continue; // константные колонки обрабатываются позже, на этапе генераци документа
@@ -123,13 +128,35 @@ public final class MapReduceGenerator {
           throw new IllegalArgumentException("ColumnType.CALCULATED unsupported yet!");
         if (column.getDescriptor() == null || "".equals(column.getDescriptor()))
           throw new RuntimeException(descriptor.getTable() + "." + column.getId() + ". Отсутствует выражение для колонки (descriptor)");
-
-        bf.append("\t\t").append("val=").append(column.getDescriptor()).append(";").append("\n");
-        bf.append("\t\t").append("result.").append(column.getId()).
-            append("={value:val,fixed:val,drilldown:val!=0?[this._id]:[]};").append("\n");
+        apply.apply(column);
       }
-      bf.append("\t\t").append("return result;").append("\n");
-      bf.append("\t").append("}").append("\n");
     }
+
+    public String reduceFunction() {
+      final StringBuilder bf = new StringBuilder("function (key, values){\n");
+      bf.append(" var result={};\n");
+      forEachColumn(new IApply() {
+        @Override
+        public void apply(ColumnDescriptor column) {
+          bf.append(String.format(" result.%s={value:0,fixed:0,drilldown:[]};\n", column.getId()));
+        }
+      });
+      bf.append(" for(var idx=0;idx<values.length;++idx){\n");
+      forEachColumn(new IApply() {
+        @Override
+        public void apply(ColumnDescriptor column) {
+          bf.append(String.format("  result.%s.value+=values[idx].%s.value;\n", column.getId(), column.getId()));
+          bf.append(String.format("  result.%s.fixed+=values[idx].%s.fixed;\n", column.getId(), column.getId()));
+          bf.append(String.format("  if(values[idx].%s.value!=0)\n", column.getId()));
+          bf.append(String.format("   result.%s.drilldown=result.%s.drilldown.concat(values[idx].%s.value);\n",
+                  column.getId(), column.getId(), column.getId()));
+        }
+      });
+      bf.append(" }\n");
+      bf.append(" return result;\n");
+      bf.append("}");
+      return bf.toString();
+    }
+
   }
 }

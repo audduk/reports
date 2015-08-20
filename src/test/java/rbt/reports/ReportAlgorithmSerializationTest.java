@@ -11,13 +11,16 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import rbt.reports.entities.TableDescriptor;
-import rbt.reports.impl.GeneratorUtils;
 import rbt.reports.impl.MapReduceGenerator;
 import rbt.reports.impl.Mongo;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import static rbt.reports.impl.GeneratorUtils.newMap;
 
 /**
  * Тестируем загрузку алгоритмов из эталонных json
@@ -35,8 +38,6 @@ public class ReportAlgorithmSerializationTest {
       Properties prop = new Properties();
       prop.load(fr);
       mongo = new Mongo(prop);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -67,42 +68,68 @@ public class ReportAlgorithmSerializationTest {
     return null;
   }
 
-  @Test
-  @Ignore
   /**
    * Отладка работы с MongoDB - не для автоматического тестирования
    */
+  @Test
+  @Ignore
   public void initialCollectionTest() {
     TableDescriptor desc = readDescriptor("test.json");
 
-    Map<String, Map<String, Object>> emptyCollection = GeneratorUtils.emptyCollection(desc);
-    Mongo.Collection collection = mongo.new Collection("rrr");
-    collection.insertAll(emptyCollection.values());
+    List<Map<String, Object>> testCollection = new ArrayList<Map<String, Object>>(10);
+    testCollection.add(newMap("age", 1, "mkb", "A01"));
+    testCollection.add(newMap("age", 10, "mkb", "A01"));
+    testCollection.add(newMap("age", 18, "mkb", "A01"));
+    testCollection.add(newMap("age", 18, "mkb", "I01"));
+    testCollection.add(newMap("age", 17, "mkb", "I01"));
+
+    MapReduceGenerator.Result result = MapReduceGenerator.generate(desc);
+
+    Mongo.Collection collection = mongo.new Collection("test.collection");
+    collection.insertAll(testCollection);
+    collection.mapReduce(result.getMap(), result.getReduce(), null, "test.mapreduce");
+
+//    Map<String, Map<String, Object>> emptyCollection = GeneratorUtils.emptyCollection(desc);
+//    Mongo.Collection collection = mongo.new Collection("rrr");
+//    collection.insertAll(emptyCollection.values());
   }
 
-  @Test
   /**
-   * Проверяем основной функционал методов генерация js-функций (map и reduce)
+   * Проверка основного функционала методов генерации js-функций (map и reduce) - проверка синтаксиса функций
    */
-  public void mapGeneratorTest() {
+  @Test
+  public void generatorResultSyntaxTest() {
     TableDescriptor desc = readDescriptor("test.json");
 
-    MapReduceGenerator.Generator gen = new MapReduceGenerator.Generator();
-    //выполняем генерацию функции map
-    String mapFunc = gen.generateMapFunction(desc);
-    mapFunc = mapFunc.replace("function (){\n", "function _map(){\n"); //замена для обеспечения работы Parser
-    System.out.println(mapFunc);
-    // Выполняем проверку синтаксиса сгенерированной функции map
+    MapReduceGenerator.Result result = MapReduceGenerator.generate(desc);
+    //выполняем проверку синтаксиса функции map
+    System.out.println(result.getMap());
+    checkSyntax(result.getMap());
+    //выполняем проверку синтаксиса функции reduce
+    System.out.println(result.getReduce());
+    checkSyntax(result.getReduce());
+  }
+
+  /**
+   * Проверка синтаксиса JavaScript-функции
+   * @param code код проверяемой функции
+   */
+  private void checkSyntax(String code) {
+    code = code.replace("function (", "function _("); //замена для обеспечения работы Parser
+
     final Reporter errorReporter = new Reporter();
     Parser parser = new Parser(
         new Parser.Config(Parser.Config.Mode.ES3),
         errorReporter,
-        new SourceFile("", mapFunc)
-    );
+        new SourceFile("", code));
     parser.parseProgram();
-    Assert.assertTrue("Некорректный синтаксис функции map", errorReporter.getNumErrors() == 0);
+    Assert.assertTrue("Некорректный синтаксис функции", errorReporter.getNumErrors() == 0);
+    System.out.println("--- Check finished ---");
   }
 
+  /**
+   * Накопление информации о синтаксических ошибках
+   */
   private static class Reporter extends ErrorReporter {
     private Integer numErrors = 0;
     private Integer numWarnings = 0;

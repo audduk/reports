@@ -60,8 +60,10 @@ public class Mongo implements Closeable {
       collection.find();
     }
 
-    public void mapReduce(String map , String reduce , String outputCollection) {
-      collection.mapReduce(map, reduce, outputCollection, MapReduceCommand.OutputType.REDUCE, null);
+    public void mapReduce(String map , String reduce, Map<String, Object> scope, String outputTarget) {
+      MapReduceCommand command = new MapReduceCommand(collection, map, reduce, outputTarget, MapReduceCommand.OutputType.REDUCE, null);
+      command.setScope(scope);
+      collection.mapReduce(command);
     }
   }
 

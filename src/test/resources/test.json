@@ -4,47 +4,47 @@
   "collection":"collection",
   "lines":[
       {
-        "id":"line1Id",
+        "id":"line1",
         "type":"VALUE",
-        "descriptor":"scope.func.between(this.mkb,'I01','I56')"
+        "descriptor":"this.mkb=='I01'"
       },
       {
-        "id":"line2Id",
+        "id":"line2",
         "type":"VALUE",
-        "descriptor":"scope.func.between(this.mkb,'A01','A56')"
+        "descriptor":"this.mkb=='A01'"
       },
       {
-        "id":"subtotalLine1Id",
+        "id":"subtotalLine1",
         "type":"SUBTOTAL",
-        "descriptor":"line2Id"
+        "descriptor":"line2"
       },
       {
-        "id":"totalLineId",
+        "id":"totalLine",
         "type":"TOTAL"
       }
     ],
   "columns":[
       {
-        "id":"col1",
+        "id":"nameColumn",
         "name":"Наименование показателя",
         "type":"CONST"
       },
       {
-        "id":"col2",
+        "id":"diagnosisColumn",
         "name":"Диагнозы",
         "type":"CONST"
       },
       {
-        "id":"col3",
+        "id":"younger",
         "name":"Младше 18 лет",
         "type":"VALUE",
-        "descriptor":"this.age<=18?1:0"
+        "descriptor":"this.age<18?1:0"
       },
       {
-        "id":"col4",
-        "name":"Младше 18 лет",
+        "id":"elder",
+        "name":"Старше 18 лет",
         "type":"VALUE",
-        "descriptor":"this.age>18?1:0"
+        "descriptor":"this.age>=18?1:0"
       }
     ]
 }
