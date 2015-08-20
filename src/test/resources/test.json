@@ -14,12 +14,12 @@
         "descriptor":"scope.func.between(this.mkb,'A01','A56')"
       },
       {
-        "id":"line3Id",
+        "id":"subtotalLine1Id",
         "type":"SUBTOTAL",
         "descriptor":"line2Id"
       },
       {
-        "id":"line4Id",
+        "id":"totalLineId",
         "type":"TOTAL"
       }
     ],

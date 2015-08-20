@@ -82,7 +82,7 @@ public final class MapReduceGenerator {
     public String generateMapFunction(TableDescriptor descriptor) {
       prepareLines(descriptor.getLines(), descriptor.getTable());
 
-      StringBuilder bf = new StringBuilder("function(){\n");
+      StringBuilder bf = new StringBuilder("function (){\n");
       bf.append("\t").append("var value = null;\n");
 
       valueFunctionGenerator(bf, descriptor);
@@ -99,6 +99,8 @@ public final class MapReduceGenerator {
         genEmit(bf, line.getId());
         if (lineEq.containsKey(line.getId()))
           genEmit(bf, lineEq.get(line.getId()));
+        if (totalLine != null && !"".equals(totalLine))
+          genEmit(bf, totalLine);
         bf.append("\t\t").append("}").append("\n");
         bf.append("\t").append("}").append("\n");
       }
@@ -107,7 +109,7 @@ public final class MapReduceGenerator {
     }
 
     private StringBuilder genEmit(StringBuilder bf, String line) {
-      return bf.append("\t\t\t").append("emit=[\"").append(line).append("\",value);").append("\n");
+      return bf.append("\t\t\t").append("emit(\"").append(line).append("\",value);").append("\n");
     }
 
     private void valueFunctionGenerator(StringBuilder bf, TableDescriptor descriptor) {
