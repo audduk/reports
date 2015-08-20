@@ -7,7 +7,7 @@ public enum ColumnType {
   /* Тип показателя - константа */
   CONST,
   /* Тип показателя - расчетный */
-  CALCULATED,
+  VALUE,
   /* Тип показателя - агрегат */
-  AGGREGATE
+  CALCULATED
 }

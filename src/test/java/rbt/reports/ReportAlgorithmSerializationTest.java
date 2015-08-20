@@ -69,6 +69,9 @@ public class ReportAlgorithmSerializationTest {
 
   @Test
   @Ignore
+  /**
+   * Отладка работы с MongoDB - не для автоматического тестирования
+   */
   public void initialCollectionTest() {
     TableDescriptor desc = readDescriptor("test.json");
 
@@ -78,13 +81,16 @@ public class ReportAlgorithmSerializationTest {
   }
 
   @Test
+  /**
+   * Проверяем основной функционал методов генерация js-функций (map и reduce)
+   */
   public void mapGeneratorTest() {
     TableDescriptor desc = readDescriptor("test.json");
 
     MapReduceGenerator.Generator gen = new MapReduceGenerator.Generator();
     //выполняем генерацию функции map
     String mapFunc = gen.generateMapFunction(desc);
-    mapFunc = mapFunc.replace("function (){\n", "function f(){\n"); //замена для обеспечения работы Parser
+    mapFunc = mapFunc.replace("function (){\n", "function _map(){\n"); //замена для обеспечения работы Parser
     System.out.println(mapFunc);
     // Выполняем проверку синтаксиса сгенерированной функции map
     final Reporter errorReporter = new Reporter();

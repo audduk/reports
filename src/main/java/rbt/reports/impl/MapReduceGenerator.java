@@ -83,7 +83,7 @@ public final class MapReduceGenerator {
       prepareLines(descriptor.getLines(), descriptor.getTable());
 
       StringBuilder bf = new StringBuilder("function (){\n");
-      bf.append("\t").append("var value = null;\n");
+      bf.append("\t").append("var _value = null;\n");
 
       valueFunctionGenerator(bf, descriptor);
 
@@ -91,11 +91,11 @@ public final class MapReduceGenerator {
         if (!LineType.VALUE.equals(line.getType()))
           continue;
         if (line.getDescriptor() == null || "".equals(line.getDescriptor()))
-          throw new RuntimeException(descriptor.getTable() + "." + line.getId() + ". Отсутствует условие фильтрации (descriptor)");
+          throw new RuntimeException(descriptor.getTable() + "." + line.getId() + ". Отсутствует условие фильтрации для строки (descriptor)");
 
         bf.append("\t").append("if(").append(line.getDescriptor()).append("){").append("\n");
-        bf.append("\t\t").append("value=valueFunc();").append("\n");
-        bf.append("\t\t").append("if(value!=null){").append("\n");
+        bf.append("\t\t").append("_value=_valueFunc();").append("\n");
+        bf.append("\t\t").append("if(_value!=null){").append("\n");
         genEmit(bf, line.getId());
         if (lineEq.containsKey(line.getId()))
           genEmit(bf, lineEq.get(line.getId()));
@@ -109,12 +109,27 @@ public final class MapReduceGenerator {
     }
 
     private StringBuilder genEmit(StringBuilder bf, String line) {
-      return bf.append("\t\t\t").append("emit(\"").append(line).append("\",value);").append("\n");
+      return bf.append("\t\t\t").append("emit(\"").append(line).append("\",_value);").append("\n");
     }
 
     private void valueFunctionGenerator(StringBuilder bf, TableDescriptor descriptor) {
-      bf.append("\t").append("var valueFunc = function(){\n");
-      bf.append("\t").append("}\n");
+      bf.append("\t").append("function _valueFunc(){").append("\n");
+      bf.append("\t\t").append("var result={};").append("\n");
+      bf.append("\t\t").append("var val;").append("\n");
+      for (ColumnDescriptor column : descriptor.getColumns()) {
+        if (ColumnType.CONST.equals(column.getType()))
+          continue; // константные колонки обрабатываются позже, на этапе генераци документа
+        if (ColumnType.CALCULATED.equals(column.getType()))
+          throw new IllegalArgumentException("ColumnType.CALCULATED unsupported yet!");
+        if (column.getDescriptor() == null || "".equals(column.getDescriptor()))
+          throw new RuntimeException(descriptor.getTable() + "." + column.getId() + ". Отсутствует выражение для колонки (descriptor)");
+
+        bf.append("\t\t").append("val=").append(column.getDescriptor()).append(";").append("\n");
+        bf.append("\t\t").append("result.").append(column.getId()).
+            append("={value:val,fixed:val,drilldown:val!=0?[this._id]:[]};").append("\n");
+      }
+      bf.append("\t\t").append("return result;").append("\n");
+      bf.append("\t").append("}").append("\n");
     }
   }
 }
