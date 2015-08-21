@@ -5,9 +5,7 @@ import com.mongodb.*;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Реализация логики работы с базой MongoDB
@@ -61,6 +59,10 @@ public class Mongo implements Closeable {
         insert(obj);
     }
 
+    public java.util.Collection<Map<String, Object>> select() {
+      return select(new HashMap<String, Object>());
+    }
+
     public java.util.Collection<Map<String, Object>> select(Map<String, Object> filter) {
       java.util.Collection<Map<String, Object>> result = new ArrayList<>();
       DBCursor cursor = collection.find(new BasicDBObject(filter));
@@ -72,7 +74,7 @@ public class Mongo implements Closeable {
     }
 
     public Collection mapReduce(String map , String reduce, Map<String, Object> scope, String outputTarget) {
-      MapReduceCommand command = new MapReduceCommand(collection, map, reduce, outputTarget, MapReduceCommand.OutputType.REDUCE, null);
+      MapReduceCommand command = new MapReduceCommand(collection, map, reduce, outputTarget, MapReduceCommand.OutputType.REPLACE, null);
       command.setScope(scope);
       return new Collection(collection.mapReduce(command).getOutputCollection());
     }

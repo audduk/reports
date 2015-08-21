@@ -47,7 +47,7 @@ public class ReportManagerImpl implements ReportManager {
         docId + "." + descriptor.getTable());
 
     //загружаем результат из заполненной коллекции и переместить в документы
-    Collection<Map<String, Object>> resultData = result.select(new HashMap<String, Object>());
+    Collection<Map<String, Object>> resultData = result.select();
     //преобразуем загруженный результат в структуру content
     Map<String, Map<String, Object>> content = new HashMap<>(resultData.size());
     for (Map<String, Object> entry : resultData)
