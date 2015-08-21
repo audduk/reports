@@ -15,43 +15,50 @@ public class ReportManagerImpl implements ReportManager {
   @Value("${contentCollection:content}")
   private String contentCollection = "content";
 
+  @Value("${contentCollection:content}")
+  private String documentCollection = "documents";
+
   private Mongo mongo;
 
   public ReportManagerImpl(Mongo mongo) {
     this.mongo = mongo;
   }
 
+  public String getContentCollection() {
+    return contentCollection;
+  }
+
+  public String getDocumentCollection() {
+    return documentCollection;
+  }
+
   @Override
   public String generateEmptyReportTable(String docId, TableDescriptor descriptor) {
-    return internalGenerateDocument(docId, descriptor, true);
+    Map<String, Map<String, Object>> content = GeneratorUtils.emptyCollection(descriptor);
+    return saveDocumentContent(docId, descriptor, content);
   }
 
   @Override
   public String generateReportTable(String docId, TableDescriptor descriptor) {
-    return internalGenerateDocument(docId, descriptor, false);
+    //выполняем MapReduce для коллекции (сохраняем результат в коллекцию с именем docId.tableId)
+    MapReduceGenerator.Result mapReduce = MapReduceGenerator.generate(descriptor);
+    Mongo.Collection collection = mongo.new Collection(descriptor.getCollection());
+    Mongo.Collection result = collection.mapReduce(mapReduce.getMap(), mapReduce.getReduce(), mapReduce.getScope(),
+        docId + "." + descriptor.getTable());
+
+    //загружаем результат из заполненной коллекции и переместить в документы
+    Collection<Map<String, Object>> resultData = result.select(new HashMap<String, Object>());
+    //преобразуем загруженный результат в структуру content
+    Map<String, Map<String, Object>> content = new HashMap<>(resultData.size());
+    for (Map<String, Object> entry : resultData)
+      content.put((String) entry.get("_id"), entry); // ожидается, что _id - это именно строка, в противном случае - ошибка!
+    return saveDocumentContent(docId, descriptor, content);
   }
 
-  private String internalGenerateDocument(String docId, TableDescriptor descriptor, Boolean empty) {
-    GeneratorUtils generator = new GeneratorUtils();
-    //сформировать пустую коллекцию
-    Map<String, Map<String, Object>> content = generator.emptyCollection(descriptor);
-    if (!empty) {
-      final String collectionName = docId + "." + descriptor.getTable();
-      // сохранить пустую коллекцию в базе (имя коллекции = docId.tableid)
-      Mongo.Collection collection = mongo.new Collection(collectionName);
-      collection.insertAll(content.values());
-      //сформировать MapReduce
-      MapReduceGenerator.Result mapReduce = MapReduceGenerator.generate(descriptor);
-      //выполнить MapReduce для коллекции (сохраняем результат в коллекцию с именем collectionName)
-      Mongo.Collection reduceCollection = mongo.new Collection(descriptor.getCollection());
-      reduceCollection.mapReduce(mapReduce.getMap(), mapReduce.getReduce(), null, collectionName);
-      //загрузить результат из заполненной коллекции в переменную content
-      // ...
-    }
-    //выполнить копирование данных в коллекцию документов
-    Collection<Map<String, Object>> documentCollection = generator.copyToDocument(descriptor, docId, content);
-    //выполнить сохранение документа в базу данных
-    //...
+  private String saveDocumentContent(String docId, TableDescriptor descriptor, Map<String, Map<String, Object>> content) {
+    Collection<Map<String, Object>> documentCollection = GeneratorUtils.copyToDocument(descriptor, docId, content);
+    Mongo.Collection collection = mongo.new Collection(contentCollection);
+    collection.insertAll(documentCollection);
     return docId;
   }
 

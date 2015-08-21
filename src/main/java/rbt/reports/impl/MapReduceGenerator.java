@@ -10,11 +10,11 @@ import java.util.*;
  */
 public final class MapReduceGenerator {
   public static class Result {
-    private String scope;
+    private Map<String, Object> scope = null;
     private String map;
     private String reduce;
 
-    public String getScope() {
+    public Map<String, Object> getScope() {
       return scope;
     }
 
@@ -37,7 +37,7 @@ public final class MapReduceGenerator {
 
   private static class Generator {
     //установленное соответствие между строками для построения строк таблицы типа SUBTOTAL
-    private Map<String,String> lineEq = new HashMap<String, String>();
+    private Map<String,String> lineEq = new HashMap<>();
     //строка таблицы типа TOTAL, должна быть единственной в рамках таблицы
     private String totalLine = null;
     //описатель таблицы, для которого выполняется генерация
@@ -125,7 +125,7 @@ public final class MapReduceGenerator {
         if (ColumnType.CONST.equals(column.getType()))
           continue; // константные колонки обрабатываются позже, на этапе генераци документа
         if (ColumnType.CALCULATED.equals(column.getType()))
-          throw new IllegalArgumentException("ColumnType.CALCULATED unsupported yet!");
+          throw new IllegalArgumentException("ColumnType.CALCULATED unsupported yet!"); //TODO
         if (column.getDescriptor() == null || "".equals(column.getDescriptor()))
           throw new RuntimeException(descriptor.getTable() + "." + column.getId() + ". Отсутствует выражение для колонки (descriptor)");
         apply.apply(column);

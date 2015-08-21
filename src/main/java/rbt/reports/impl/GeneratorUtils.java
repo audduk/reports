@@ -16,7 +16,7 @@ public final class GeneratorUtils {
    * @return описание требуемого объекта
    */
   public static Map<String, Object> generateEmptyValue(TableDescriptor descriptor) {
-    Map<String, Object> result = new HashMap<String, Object>();
+    Map<String, Object> result = new HashMap<>();
     if (descriptor.getColumns() != null)
       for (ColumnDescriptor column : descriptor.getColumns())
         result.put(column.getId(), newMap("value", 0, "fixed", 0, "drilldown", new ArrayList<String>()));
@@ -32,13 +32,12 @@ public final class GeneratorUtils {
     //считаем, что начальное состояние у всех объектов-строк одинаковое
     final Map<String, Object> emptyValue = generateEmptyValue(descriptor);
 
-    Map<String, Map<String, Object>> result = new HashMap<String, Map<String, Object>>();
+    Map<String, Map<String, Object>> result = new HashMap<>();
     if (descriptor.getLines() != null)
       for (LineDescriptor line : descriptor.getLines()) {
-        Map<String, Object> entry = new HashMap<String, Object>(2);
-        entry.put("value", emptyValue);
-        entry.put("_id", line.getId());
-        result.put(line.getId(), entry);
+        result.put(line.getId(), newMap(
+            "_id", line.getId(),
+            "value", emptyValue));
       }
     return result;
   }
@@ -52,18 +51,19 @@ public final class GeneratorUtils {
    */
   public static Collection<Map<String, Object>> copyToDocument(TableDescriptor descriptor, String docId,
                                                         Map<String, Map<String, Object>> collection) {
-    Collection<Map<String, Object>> result = new ArrayList<Map<String, Object>>(collection.size());
+    Collection<Map<String, Object>> result = new ArrayList<>(collection.size());
     for (int i = 0; i < descriptor.getLines().size(); ++i) {
       final LineDescriptor line = descriptor.getLines().get(i);
-      if (collection.get(line.getId()) == null)
+      final Map<String, Object> value = collection.get(line.getId()); //содержимое строки
+      if (value == null || !value.containsKey("value"))
         throw new RuntimeException("Коллекция не соответствует описателю отчета. Отсутствует строка " + line.getId());
       result.add(newMap(
           "doc",    docId,          // идентификатор отчета
           "table",  descriptor.getTable(),  // идентификатор таблицы в рамках отчета
           "line",   line.getId(),   // идентификатор строки в рамках таблицы
-          "type",   line.getType(), // тип строки документа
+          "type",   line.getType().toString(), // тип строки документа
           "number", i,              // номер строки документа по порядку, упорядочение строк в рамках таблицы
-          "value",  collection.get(line.getId()))
+          "value",  value.get("value"))
       );
     }
     return result;
@@ -76,7 +76,7 @@ public final class GeneratorUtils {
   public static Map<String, Object> newMap(Object... content) {
     if (content.length <= 1 || content.length % 2 != 0)
       throw new IllegalArgumentException("Неправильный набор аргументов функции");
-    Map<String, Object> result = new HashMap<String, Object>(content.length/2);
+    Map<String, Object> result = new HashMap<>(content.length/2);
     for (int i=0; i < content.length; i+=2)
       result.put((String) content[i], content[i+1]);
     return result;
