@@ -112,7 +112,7 @@ public final class MapReduceGenerator {
         @Override
         public void apply(ColumnDescriptor column) {
           bf.append(String.format("  val=%s;\n", column.getDescriptor()));
-          bf.append(String.format("  result.%s={value:val,fixed:val%s};\n", column.getId(),
+          bf.append(String.format("  result.%s={value:val%s};\n", column.getId(),
               documentColumn != null ? String.format(",drilldown:val!=0?[this.%s]:[]", documentColumn) : ""));
         }
       });
@@ -142,7 +142,7 @@ public final class MapReduceGenerator {
       forEachColumn(new IApply() {
         @Override
         public void apply(ColumnDescriptor column) {
-          bf.append(String.format(" result.%s={value:0,fixed:0%s};\n", column.getId(),
+          bf.append(String.format(" result.%s={value:0%s};\n", column.getId(),
               documentColumn != null ? ",drilldown:[]" : ""));
         }
       });
@@ -152,7 +152,6 @@ public final class MapReduceGenerator {
         @Override
         public void apply(ColumnDescriptor column) {
           bf.append(String.format("  result.%s.value+=_idxVal.%s.value;\n", column.getId(), column.getId()));
-          bf.append(String.format("  result.%s.fixed+=_idxVal.%s.fixed;\n", column.getId(), column.getId()));
           if (documentColumn != null) {
             bf.append(String.format("  if(_idxVal.%s.value!=0)\n", column.getId()));
             bf.append(String.format("   result.%s.drilldown=result.%s.drilldown.concat(_idxVal.%s.drilldown);\n",
