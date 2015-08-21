@@ -42,9 +42,12 @@ public final class MapReduceGenerator {
     private String totalLine = null;
     //описатель таблицы, для которого выполняется генерация
     private TableDescriptor descriptor;
+    // Наличие идентификатора базового документа является так же признаком наличия поля drilldown
+    private String documentColumn;
 
     public Generator(TableDescriptor descriptor) {
       this.descriptor = descriptor;
+      this.documentColumn = descriptor.getDocumentColumn();
       prepareLines(descriptor.getLines(), descriptor.getTable());
     }
 
@@ -109,7 +112,8 @@ public final class MapReduceGenerator {
         @Override
         public void apply(ColumnDescriptor column) {
           bf.append(String.format("  val=%s;\n", column.getDescriptor()));
-          bf.append(String.format("  result.%s={value:val,fixed:val,drilldown:val!=0?[this._id]:[]};\n", column.getId()));
+          bf.append(String.format("  result.%s={value:val,fixed:val%s};\n", column.getId(),
+              documentColumn != null ? String.format(",drilldown:val!=0?[this.%s]:[]", documentColumn) : ""));
         }
       });
       bf.append("  return result;\n");
@@ -138,18 +142,22 @@ public final class MapReduceGenerator {
       forEachColumn(new IApply() {
         @Override
         public void apply(ColumnDescriptor column) {
-          bf.append(String.format(" result.%s={value:0,fixed:0,drilldown:[]};\n", column.getId()));
+          bf.append(String.format(" result.%s={value:0,fixed:0%s};\n", column.getId(),
+              documentColumn != null ? ",drilldown:[]" : ""));
         }
       });
-      bf.append(" for(var idx=0;idx<values.length;++idx){\n");
+      bf.append(" for(var idx=values.length-1;idx>=0;--idx){\n");
+      bf.append("  var _idxVal=values[idx];\n");
       forEachColumn(new IApply() {
         @Override
         public void apply(ColumnDescriptor column) {
-          bf.append(String.format("  result.%s.value+=values[idx].%s.value;\n", column.getId(), column.getId()));
-          bf.append(String.format("  result.%s.fixed+=values[idx].%s.fixed;\n", column.getId(), column.getId()));
-          bf.append(String.format("  if(values[idx].%s.value!=0)\n", column.getId()));
-          bf.append(String.format("   result.%s.drilldown=result.%s.drilldown.concat(values[idx].%s.value);\n",
-                  column.getId(), column.getId(), column.getId()));
+          bf.append(String.format("  result.%s.value+=_idxVal.%s.value;\n", column.getId(), column.getId()));
+          bf.append(String.format("  result.%s.fixed+=_idxVal.%s.fixed;\n", column.getId(), column.getId()));
+          if (documentColumn != null) {
+            bf.append(String.format("  if(_idxVal.%s.value!=0)\n", column.getId()));
+            bf.append(String.format("   result.%s.drilldown=result.%s.drilldown.concat(_idxVal.%s.drilldown);\n",
+                column.getId(), column.getId(), column.getId()));
+          }
         }
       });
       bf.append(" }\n");

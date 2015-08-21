@@ -43,11 +43,11 @@ public class MongoExecutionTest extends AbstractGeneration {
     collection = mongo.new Collection(desc.getCollection());
     if (collection.select(new HashMap<String, Object>()).size() == 0) {
       List<Map<String, Object>> testCollection = new ArrayList<>(10);
-      testCollection.add(newMap("age", 1, "mkb", "A01"));
-      testCollection.add(newMap("age", 10, "mkb", "A01"));
-      testCollection.add(newMap("age", 18, "mkb", "A01"));
-      testCollection.add(newMap("age", 18, "mkb", "I01"));
-      testCollection.add(newMap("age", 17, "mkb", "I01"));
+      testCollection.add(newMap("age", 1,  "mkb", "A01", "caseId", "c1"));
+      testCollection.add(newMap("age", 10, "mkb", "A01", "caseId", "c2"));
+      testCollection.add(newMap("age", 18, "mkb", "A01", "caseId", "c3"));
+      testCollection.add(newMap("age", 18, "mkb", "I01", "caseId", "c4"));
+      testCollection.add(newMap("age", 17, "mkb", "I01", "caseId", "c5"));
 
       collection.insertAll(testCollection);
     }

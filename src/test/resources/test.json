@@ -2,6 +2,7 @@
   "table":"TableID",
   "name":"Test",
   "collection":"collection",
+  "documentColumn":"caseId",
   "lines":[
       {
         "id":"line1",
