@@ -1,6 +1,8 @@
 package rbt.reports.impl;
 
 import com.mongodb.*;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -10,6 +12,8 @@ import java.util.*;
 /**
  * Реализация логики работы с базой MongoDB
  */
+@Service
+@Scope("singleton")
 public class Mongo implements Closeable {
   // подключение к серверу Mongo
   private MongoClient mongoClient;
@@ -20,20 +24,23 @@ public class Mongo implements Closeable {
   // тут мы будем хранить состояние подключения к БД
   private boolean authenticate;
 
+  public Mongo() {
+    this("localhost", 27017, "test", null, null);
+  }
+
   public Mongo(Properties prop) {
+    this(prop.getProperty("host"), Integer.valueOf(prop.getProperty("port")), prop.getProperty("dbname"),
+         prop.getProperty("login"), prop.getProperty("password"));
+  }
+
+  protected Mongo(String host, Integer port, String dbName, String login, String password) {
     try {
-      // Создаем подключение
-      mongoClient = new MongoClient( prop.getProperty("host"), Integer.valueOf(prop.getProperty("port")) );
-
-      // Выбираем БД для дальнейшей работы
-      db = mongoClient.getDB(prop.getProperty("dbname"));
-
+      mongoClient = new MongoClient(host, port); // Создаем подключение
+      db = mongoClient.getDB(dbName); // Выбираем БД для работы
       // Входим под созданным логином и паролем
-      if (prop.getProperty("login") != null)
-        authenticate = db.authenticate(prop.getProperty("login"), prop.getProperty("password").toCharArray());
-
+      if (login != null)
+        authenticate = db.authenticate(login, password.toCharArray());
     } catch (UnknownHostException e) {
-      // Если возникли проблемы при подключении сообщаем об этом
       System.err.println("Don't connect!");
     }
   }
