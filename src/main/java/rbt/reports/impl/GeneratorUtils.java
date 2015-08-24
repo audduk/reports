@@ -46,11 +46,12 @@ public final class GeneratorUtils {
    * Выполняет копирование из промежуточной коллекции в коллекцию документов
    * @param descriptor описатель отчета
    * @param docId идентификатор отчета
+   * @param table идентификатор таблицы отчета
    * @param collection промежуточная (расчетная) коллекция
    * @return заполненная коллекция документов, подготовленная для сохранения в базу данных
    */
-  public static Collection<Map<String, Object>> copyToDocument(TableDescriptor descriptor, String docId,
-                                                        Map<String, Map<String, Object>> collection) {
+  public static Collection<Map<String, Object>> copyToDocument(TableDescriptor descriptor, String docId, String table,
+                                                               Map<String, Map<String, Object>> collection) {
     Collection<Map<String, Object>> result = new ArrayList<>(collection.size());
     for (int i = 0; i < descriptor.getLines().size(); ++i) {
       final LineDescriptor line = descriptor.getLines().get(i);
@@ -59,7 +60,7 @@ public final class GeneratorUtils {
         throw new RuntimeException("Коллекция не соответствует описателю отчета. Отсутствует строка " + line.getId());
       result.add(newMap(
           "doc",    docId,          // идентификатор отчета
-          "table",  descriptor.getTable(),  // идентификатор таблицы в рамках отчета
+          "table",  table,          // идентификатор таблицы в рамках отчета
           "line",   line.getId(),   // идентификатор строки в рамках таблицы
           "type",   line.getType().toString(), // тип строки документа
           "number", i,              // номер строки документа по порядку, упорядочение строк в рамках таблицы

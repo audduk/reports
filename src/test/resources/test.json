@@ -1,5 +1,4 @@
 {
-  "table":"TableID",
   "name":"Test",
   "collection":"collection",
   "documentColumn":"caseId",

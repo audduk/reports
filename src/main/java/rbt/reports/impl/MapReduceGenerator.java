@@ -27,8 +27,8 @@ public final class MapReduceGenerator {
     }
   }
 
-  public static Result generate(TableDescriptor descriptor) {
-    final Generator gen = new Generator(descriptor);
+  public static Result generate(TableDescriptor descriptor, String table) {
+    final Generator gen = new Generator(descriptor, table);
     Result result = new Result();
     result.map = gen.mapFunction();
     result.reduce = gen.reduceFunction();
@@ -41,14 +41,17 @@ public final class MapReduceGenerator {
     //строка таблицы типа TOTAL, должна быть единственной в рамках таблицы
     private String totalLine = null;
     //описатель таблицы, для которого выполняется генерация
-    private TableDescriptor descriptor;
+    private final TableDescriptor descriptor;
+    //идентификатор таблицы в рамках отчета
+    private final String table;
     // Наличие идентификатора базового документа является так же признаком наличия поля drilldown
-    private String documentColumn;
+    private final String documentColumn;
 
-    public Generator(TableDescriptor descriptor) {
+    public Generator(TableDescriptor descriptor, String table) {
       this.descriptor = descriptor;
+      this.table = table;
       this.documentColumn = descriptor.getDocumentColumn();
-      prepareLines(descriptor.getLines(), descriptor.getTable());
+      prepareLines(descriptor.getLines(), table);
     }
 
     private void prepareLines(List<LineDescriptor> lines, String table) {
@@ -83,7 +86,7 @@ public final class MapReduceGenerator {
         if (!LineType.VALUE.equals(line.getType()))
           continue;
         if (line.getDescriptor() == null || "".equals(line.getDescriptor()))
-          throw new RuntimeException(descriptor.getTable() + "." + line.getId() + ". Отсутствует условие фильтрации для строки (descriptor)");
+          throw new RuntimeException(table + "." + line.getId() + ". Отсутствует условие фильтрации для строки (descriptor)");
 
         bf.append(String.format(" if(%s){\n", line.getDescriptor()));
         bf.append(String.format("  _value=_valueFunc.call(this);\n")); //call!
@@ -131,7 +134,7 @@ public final class MapReduceGenerator {
         if (ColumnType.CALCULATED.equals(column.getType()))
           throw new IllegalArgumentException("ColumnType.CALCULATED unsupported yet!"); //TODO
         if (column.getDescriptor() == null || "".equals(column.getDescriptor()))
-          throw new RuntimeException(descriptor.getTable() + "." + column.getId() + ". Отсутствует выражение для колонки (descriptor)");
+          throw new RuntimeException(table + "." + column.getId() + ". Отсутствует выражение для колонки (descriptor)");
         apply.apply(column);
       }
     }

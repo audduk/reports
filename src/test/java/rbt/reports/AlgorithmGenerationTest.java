@@ -31,7 +31,7 @@ public class AlgorithmGenerationTest extends AbstractGeneration {
   public void generatorResultSyntaxTest() {
     TableDescriptor desc = readDescriptor("test.json");
 
-    MapReduceGenerator.Result result = MapReduceGenerator.generate(desc);
+    MapReduceGenerator.Result result = MapReduceGenerator.generate(desc, "TableID");
     //выполняем проверку синтаксиса функции map
     System.out.println(result.getMap());
     checkSyntax(result.getMap());

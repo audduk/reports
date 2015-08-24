@@ -33,18 +33,18 @@ public class ReportManagerImpl implements ReportManager {
   }
 
   @Override
-  public String generateEmptyReportTable(String docId, TableDescriptor descriptor) {
+  public String generateEmptyReportTable(String docId, String table, TableDescriptor descriptor) {
     Map<String, Map<String, Object>> content = GeneratorUtils.emptyCollection(descriptor);
-    return saveDocumentContent(docId, descriptor, content);
+    return saveDocumentContent(docId, table, descriptor, content);
   }
 
   @Override
-  public String generateReportTable(String docId, TableDescriptor descriptor) {
+  public String generateReportTable(String docId, String table, TableDescriptor descriptor) {
     //выполняем MapReduce для коллекции (сохраняем результат в коллекцию с именем docId.tableId)
-    MapReduceGenerator.Result mapReduce = MapReduceGenerator.generate(descriptor);
+    MapReduceGenerator.Result mapReduce = MapReduceGenerator.generate(descriptor, table);
     Mongo.Collection collection = mongo.new Collection(descriptor.getCollection());
     Mongo.Collection result = collection.mapReduce(mapReduce.getMap(), mapReduce.getReduce(), mapReduce.getScope(),
-        docId + "." + descriptor.getTable());
+        docId + "." + table);
 
     //загружаем результат из заполненной коллекции и переместить в документы
     Collection<Map<String, Object>> resultData = result.select();
@@ -52,11 +52,11 @@ public class ReportManagerImpl implements ReportManager {
     Map<String, Map<String, Object>> content = new HashMap<>(resultData.size());
     for (Map<String, Object> entry : resultData)
       content.put((String) entry.get("_id"), entry); // ожидается, что _id - это именно строка, в противном случае - ошибка!
-    return saveDocumentContent(docId, descriptor, content);
+    return saveDocumentContent(docId, table, descriptor, content);
   }
 
-  private String saveDocumentContent(String docId, TableDescriptor descriptor, Map<String, Map<String, Object>> content) {
-    Collection<Map<String, Object>> documentCollection = GeneratorUtils.copyToDocument(descriptor, docId, content);
+  private String saveDocumentContent(String docId, String table, TableDescriptor descriptor, Map<String, Map<String, Object>> content) {
+    Collection<Map<String, Object>> documentCollection = GeneratorUtils.copyToDocument(descriptor, docId, table, content);
     Mongo.Collection collection = mongo.new Collection(contentCollection);
     collection.insertAll(documentCollection);
     return docId;

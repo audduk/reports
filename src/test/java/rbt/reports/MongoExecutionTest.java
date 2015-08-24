@@ -22,6 +22,10 @@ public class MongoExecutionTest extends AbstractGeneration {
    */
   private TableDescriptor desc;
   /**
+   * Эталонный описатель отчета
+   */
+  private final String table = "TableID";
+  /**
    * Тестовая коллекция mongo (заполнена эталонными тестовыми данными)
    */
   private Mongo.Collection collection;
@@ -71,7 +75,7 @@ public class MongoExecutionTest extends AbstractGeneration {
    * Тестируем выполнение сгенерированного на основе эталонного описателя процесса MapReduce
    */
   public void mapReduceTest() {
-    MapReduceGenerator.Result mapReduce = MapReduceGenerator.generate(desc);
+    MapReduceGenerator.Result mapReduce = MapReduceGenerator.generate(desc, table);
     Mongo.Collection resultCollection = collection.mapReduce(mapReduce.getMap(), mapReduce.getReduce(), mapReduce.getScope(), "__reduce");
     // проверяем полученный результат
     Collection<Map<String, Object>> resultData = resultCollection.select();
@@ -99,9 +103,9 @@ public class MongoExecutionTest extends AbstractGeneration {
    */
   public void reportTableGenerationTest() {
     ReportManagerImpl manager = new ReportManagerImpl(mongo);
-    String filledReport = manager.generateReportTable(UUID.randomUUID().toString().toLowerCase(), desc);
+    String filledReport = manager.generateReportTable(UUID.randomUUID().toString().toLowerCase(), table, desc);
     System.out.println(String.format("Report table '%s' generated in '%s' collection", filledReport, manager.getContentCollection()));
-    System.out.println(String.format("\tMapReduce collection - '%s.%s'", filledReport, desc.getTable()));
+    System.out.println(String.format("\tMapReduce collection - '%s.%s'", filledReport, table));
   }
 
   @Test
@@ -111,7 +115,7 @@ public class MongoExecutionTest extends AbstractGeneration {
    */
   public void emptyTableGenerationTest() {
     ReportManagerImpl manager = new ReportManagerImpl(mongo);
-    String emptyReport = manager.generateEmptyReportTable(UUID.randomUUID().toString().toLowerCase(), desc);
+    String emptyReport = manager.generateEmptyReportTable(UUID.randomUUID().toString().toLowerCase(), table, desc);
     System.out.println(String.format("Empty report table '%s' generated in '%s' collection", emptyReport, manager.getContentCollection()));
   }
 

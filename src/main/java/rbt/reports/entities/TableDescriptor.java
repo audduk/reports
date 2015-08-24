@@ -6,8 +6,6 @@ import java.util.List;
  * Описатель таблицы регламентированного отчета
  */
 public class TableDescriptor {
-  /** Наименование (идентификатор) таблицы в рамках отчета */
-  private String table;
   /** Читаемое название таблицы (для построения интерфейса пользователя */
   private String name;
   /** Наименование базовой коллекции */
@@ -18,14 +16,6 @@ public class TableDescriptor {
   private List<LineDescriptor> lines;
   /** Описатели колонок таблицы */
   private List<ColumnDescriptor> columns;
-
-  public String getTable() {
-    return table;
-  }
-
-  public void setTable(String table) {
-    this.table = table;
-  }
 
   public String getName() {
     return name;
