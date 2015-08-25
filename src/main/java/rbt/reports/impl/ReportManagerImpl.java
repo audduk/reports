@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rbt.reports.ReportManager;
+import rbt.reports.entities.LineDescriptor;
 import rbt.reports.entities.ReportDescriptor;
 import rbt.reports.entities.TableDescriptor;
 
@@ -25,10 +26,12 @@ public class ReportManagerImpl implements ReportManager {
   private String documentCollection = "documents";
 
   private Mongo mongo;
+  private DescriptorRepository repository;
 
   @Autowired
-  public ReportManagerImpl(Mongo mongo) {
+  public ReportManagerImpl(Mongo mongo, DescriptorRepository repository) {
     this.mongo = mongo;
+    this.repository = repository;
   }
 
   public String getContentCollection() {
@@ -73,6 +76,24 @@ public class ReportManagerImpl implements ReportManager {
   public Collection<Map<String, Object>> getReportTableData(String docId, String table) {
     Mongo.Collection collection = mongo.new Collection(contentCollection);
     Collection<Map<String, Object>> result = collection.select(newMap("doc", docId, "table", table));
+
+    //TODO Необходимо релизовать логику работы с отчетом и его описателем
+
+    //заполняем промежуточное представление, для облегчения механизма обработки описателя
+    Map<String, Map<String, Object>> content = new HashMap<>(result.size());
+    for (Map<String, Object> entry : result)
+      content.put((String) entry.get("line"), entry);
+
+    ReportDescriptor reportDesc = repository.getReportDescriptor(docId);
+    TableDescriptor tableDesc = repository.getTableDescriptor(table);
+
+    result = new ArrayList<>(result.size());
+    for (int i = 0; i < tableDesc.getLines().size(); ++i) {
+      final LineDescriptor line = tableDesc.getLines().get(i);
+      final Map<String, Object> value = content.get(line.getId()); //содержимое строки
+      if (value == null || !value.containsKey("value"))
+        throw new RuntimeException("Коллекция не соответствует описателю отчета. Отсутствует строка " + line.getId());
+    }
     return result;
   }
 
