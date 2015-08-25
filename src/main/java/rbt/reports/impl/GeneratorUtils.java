@@ -19,7 +19,7 @@ public final class GeneratorUtils {
     Map<String, Object> result = new HashMap<>();
     if (descriptor.getColumns() != null)
       for (ColumnDescriptor column : descriptor.getColumns())
-        result.put(column.getId(), newMap("value", 0, "fixed", 0, "drilldown", new ArrayList<String>()));
+        result.put(column.getId(), newMap("value", 0, "drilldown", new ArrayList<String>()));
     return result;
   }
 
@@ -34,11 +34,8 @@ public final class GeneratorUtils {
 
     Map<String, Map<String, Object>> result = new HashMap<>();
     if (descriptor.getLines() != null)
-      for (LineDescriptor line : descriptor.getLines()) {
-        result.put(line.getId(), newMap(
-            "_id", line.getId(),
-            "value", emptyValue));
-      }
+      for (LineDescriptor line : descriptor.getLines())
+        result.put(line.getId(), newMap("_id", line.getId(), "value", emptyValue));
     return result;
   }
 
