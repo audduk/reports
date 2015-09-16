@@ -1,12 +1,12 @@
 package rbt.reports.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rbt.reports.ReportManager;
-import rbt.reports.entities.LineDescriptor;
-import rbt.reports.entities.ReportDescriptor;
-import rbt.reports.entities.TableDescriptor;
+import rbt.reports.descriptors.DescriptorRepository;
+import rbt.reports.descriptors.entities.LineDescriptor;
+import rbt.reports.descriptors.entities.ReportDescriptor;
+import rbt.reports.descriptors.entities.TableDescriptor;
 
 import java.util.*;
 

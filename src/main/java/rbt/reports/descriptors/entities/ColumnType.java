@@ -1,4 +1,4 @@
-package rbt.reports.entities;
+package rbt.reports.descriptors.entities;
 
 /**
  * Тип столбца таблицы регламентированного отчета: константа, расчетный, агрегат;

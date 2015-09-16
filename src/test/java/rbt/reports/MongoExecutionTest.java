@@ -1,7 +1,7 @@
 package rbt.reports;
 
 import org.junit.*;
-import rbt.reports.entities.TableDescriptor;
+import rbt.reports.descriptors.entities.TableDescriptor;
 import rbt.reports.impl.*;
 
 import java.io.File;
@@ -102,7 +102,7 @@ public class MongoExecutionTest extends AbstractGeneration {
    * Тестируем выполнение генерации коллекции содержимого отчетов (на основе эталонного описателя)
    */
   public void reportTableGenerationTest() {
-    ReportManagerImpl manager = new ReportManagerImpl(mongo);
+    ReportManagerImpl manager = new ReportManagerImpl(mongo, null);
     String filledReport = manager.generateReportTable(UUID.randomUUID().toString().toLowerCase(), table, desc);
     System.out.println(String.format("Report table '%s' generated in '%s' collection", filledReport, manager.getContentCollection()));
     System.out.println(String.format("\tMapReduce collection - '%s.%s'", filledReport, table));
@@ -114,7 +114,7 @@ public class MongoExecutionTest extends AbstractGeneration {
    * Тестируем выполнение генерации пустой коллекции (на основе эталонного описателя)
    */
   public void emptyTableGenerationTest() {
-    ReportManagerImpl manager = new ReportManagerImpl(mongo);
+    ReportManagerImpl manager = new ReportManagerImpl(mongo, null);
     String emptyReport = manager.generateEmptyReportTable(UUID.randomUUID().toString().toLowerCase(), table, desc);
     System.out.println(String.format("Empty report table '%s' generated in '%s' collection", emptyReport, manager.getContentCollection()));
   }

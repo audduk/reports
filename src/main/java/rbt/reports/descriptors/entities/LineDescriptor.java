@@ -1,5 +1,4 @@
-package rbt.reports.entities;
-
+package rbt.reports.descriptors.entities;
 
 /**
  * Описатель строки таблицы регламентированного отчета

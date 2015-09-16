@@ -1,6 +1,8 @@
 package rbt.reports.impl;
 
-import rbt.reports.entities.*;
+import rbt.reports.descriptors.entities.ColumnDescriptor;
+import rbt.reports.descriptors.entities.LineDescriptor;
+import rbt.reports.descriptors.entities.TableDescriptor;
 
 import java.util.*;
 

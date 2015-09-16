@@ -1,4 +1,4 @@
-package rbt.reports.entities;
+package rbt.reports.descriptors.entities;
 
 /**
  * Тип строки: строка значений, промежуточный итог, итог

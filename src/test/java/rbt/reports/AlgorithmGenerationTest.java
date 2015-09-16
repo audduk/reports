@@ -7,7 +7,7 @@ import com.google.javascript.jscomp.parsing.parser.util.SourcePosition;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import rbt.reports.entities.TableDescriptor;
+import rbt.reports.descriptors.entities.TableDescriptor;
 import rbt.reports.impl.MapReduceGenerator;
 
 /**

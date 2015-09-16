@@ -1,7 +1,7 @@
 package rbt.reports;
 
-import rbt.reports.entities.ReportDescriptor;
-import rbt.reports.entities.TableDescriptor;
+import rbt.reports.descriptors.entities.ReportDescriptor;
+import rbt.reports.descriptors.entities.TableDescriptor;
 
 import java.util.Collection;
 import java.util.Map;

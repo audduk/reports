@@ -1,4 +1,4 @@
-package rbt.reports.entities;
+package rbt.reports.descriptors.entities;
 
 import java.util.List;
 

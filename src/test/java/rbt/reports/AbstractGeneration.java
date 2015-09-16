@@ -1,7 +1,7 @@
 package rbt.reports;
 
 import com.google.gson.Gson;
-import rbt.reports.entities.TableDescriptor;
+import rbt.reports.descriptors.entities.TableDescriptor;
 
 import java.io.File;
 import java.io.FileReader;

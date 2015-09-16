@@ -1,8 +1,8 @@
-package rbt.reports.impl;
+package rbt.reports.descriptors;
 
 import org.springframework.stereotype.Repository;
-import rbt.reports.entities.ReportDescriptor;
-import rbt.reports.entities.TableDescriptor;
+import rbt.reports.descriptors.entities.ReportDescriptor;
+import rbt.reports.descriptors.entities.TableDescriptor;
 
 /**
  * Методы работы с сохраненными описателями алгоритмов и отчетов

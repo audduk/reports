@@ -1,6 +1,6 @@
 package rbt.reports.impl;
 
-import rbt.reports.entities.*;
+import rbt.reports.descriptors.entities.*;
 
 import java.util.*;
 
